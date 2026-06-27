@@ -5,418 +5,154 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>店舗チェックリスト</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d26;--surface2:#22263a;
+  --accent:#f0a500;--accent2:#e05c2a;--text:#e8e8f0;
+  --muted:#7a7d94;--check:#3ecf8e;--border:#2e3148;--radius:10px;
+}
+body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px;}
 
-  :root {
-    --bg: #0f1117;
-    --surface: #1a1d26;
-    --surface2: #22263a;
-    --accent: #f0a500;
-    --accent2: #e05c2a;
-    --text: #e8e8f0;
-    --muted: #7a7d94;
-    --check: #3ecf8e;
-    --border: #2e3148;
-    --radius: 10px;
-  }
+/* Header */
+header{background:linear-gradient(135deg,var(--surface),#1e1430);border-bottom:2px solid var(--accent);padding:10px 12px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:8px;}
+.header-title{font-size:15px;font-weight:800;color:var(--accent);}
+.header-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;}
+.sync-dot.on{animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+#syncStatus{font-size:10px;color:var(--muted);}
 
-  body {
-    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding-bottom: 60px;
-  }
+/* Buttons */
+.btn{border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .15s;-webkit-tap-highlight-color:transparent;display:inline-flex;align-items:center;justify-content:center;}
+.btn:active{transform:scale(.9);}
+.btn-sm{font-size:11px;padding:4px 8px;}
+.btn-edit{background:var(--surface2);border:1px solid var(--border);color:var(--muted);}
+.btn-edit.active{background:rgba(224,92,42,.15);border-color:var(--accent2);color:var(--accent2);}
+.btn-danger{background:rgba(192,57,43,.15);border:1px solid #c0392b;color:#e74c3c;}
+.btn-success{background:rgba(62,207,142,.1);border:1px solid var(--check);color:var(--check);}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-purple{background:rgba(167,139,250,.15);border:1px solid #a78bfa;color:#a78bfa;}
 
-  /* ── Header ── */
-  header {
-    background: linear-gradient(135deg, var(--surface) 0%, #1e1430 100%);
-    border-bottom: 2px solid var(--accent);
-    padding: 16px 20px 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  header h1 {
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    color: var(--accent);
-  }
-  .header-sub {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-  .sync-indicator {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .sync-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--check);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%,100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
+/* Page tabs */
+.page-tabs{display:flex;overflow-x:auto;gap:0;background:var(--surface);border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch;}
+.page-tab{padding:9px 14px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;flex-shrink:0;user-select:none;-webkit-tap-highlight-color:transparent;}
+.page-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.page-tab-add{padding:9px 12px;font-size:16px;color:var(--muted);cursor:pointer;flex-shrink:0;}
 
-  /* ── Ad Banner ── */
-  .ad-banner {
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    padding: 8px 16px;
-    text-align: center;
-    font-size: 11px;
-    color: var(--muted);
-    cursor: pointer;
-  }
-  .ad-banner a {
-    display: inline-block;
-    background: linear-gradient(90deg, #bf0000, #e00);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 6px 18px;
-    border-radius: 4px;
-    text-decoration: none;
-    letter-spacing: 0.03em;
-  }
-  .ad-label { margin-bottom: 4px; }
+/* Stats */
+.stats-bar{display:flex;gap:5px;padding:7px 10px;background:var(--surface2);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.stat-chip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:3px 9px;white-space:nowrap;font-size:11px;color:var(--muted);flex-shrink:0;}
+.stat-chip span{color:var(--accent);font-weight:700;}
 
-  /* ── Stats bar ── */
-  .stats-bar {
-    display: flex;
-    gap: 10px;
-    padding: 10px 16px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    font-size: 12px;
-    overflow-x: auto;
-  }
-  .stat-chip {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 12px;
-    white-space: nowrap;
-    color: var(--muted);
-  }
-  .stat-chip span { color: var(--accent); font-weight: 700; }
+/* Ad */
+.ad-banner{background:var(--surface2);border-bottom:1px solid var(--border);padding:6px 12px;text-align:center;font-size:10px;color:var(--muted);}
+.ad-banner a{display:inline-block;background:linear-gradient(90deg,#bf0000,#e00);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:4px;text-decoration:none;margin-top:3px;}
 
-  /* ── Section ── */
-  .prefecture {
-    margin: 12px 12px 0;
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid var(--border);
-  }
-  .pref-header {
-    background: var(--surface2);
-    padding: 10px 16px;
-    font-size: 13px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-  }
-  .pref-header:hover { background: #252942; }
-  .pref-label {
-    font-size: 18px;
-    font-weight: 900;
-    color: var(--accent);
-    min-width: 24px;
-    text-align: center;
-  }
-  .pref-count {
-    margin-left: auto;
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .pref-toggle { color: var(--muted); font-size: 10px; }
+/* Prefecture */
+.prefecture{margin:8px 8px 0;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+.pref-header{background:var(--surface2);padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+.pref-label{font-size:16px;font-weight:900;color:var(--accent);min-width:22px;text-align:center;}
+.pref-info{font-size:11px;color:var(--muted);}
+.pref-count{margin-left:auto;font-size:11px;color:var(--muted);}
+.pref-arrow{color:var(--muted);font-size:10px;}
+.pref-body.collapsed{display:none;}
 
-  /* ── Column Headers ── */
-  .col-headers {
-    display: grid;
-    grid-template-columns: 1fr 44px 44px 44px;
-    padding: 6px 16px;
-    background: #131622;
-    font-size: 10px;
-    color: var(--muted);
-    border-top: 1px solid var(--border);
-    font-weight: 700;
-    text-align: center;
-  }
-  .col-headers .store-col { text-align: left; }
+/* Col headers */
+.col-headers{display:grid;padding:5px 10px;background:#131622;font-size:10px;color:var(--muted);border-top:1px solid var(--border);font-weight:700;text-align:center;}
+.col-headers .lbl{text-align:left;}
 
-  /* ── Store Row ── */
-  .store-row {
-    display: grid;
-    grid-template-columns: 1fr 44px 44px 44px;
-    align-items: center;
-    padding: 10px 16px;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
-    transition: background 0.15s;
-  }
-  .store-row:hover { background: #1e2235; }
-  .store-name {
-    font-size: 14px;
-    font-weight: 500;
-  }
+/* Store row */
+.store-row{display:grid;align-items:center;padding:0 10px;border-top:1px solid var(--border);background:var(--surface);min-height:44px;}
+.store-row:hover{background:#1e2235;}
+.store-name{font-size:13px;font-weight:500;padding:2px 4px 2px 0;}
 
-  /* ── Checkbox ── */
-  .check-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .cb {
-    width: 28px; height: 28px;
-    border-radius: 6px;
-    border: 2px solid var(--border);
-    background: var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-size: 16px;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .cb:active { transform: scale(0.88); }
-  .cb.checked-furuhon {
-    background: rgba(240,165,0,0.15);
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  .cb.checked-tsutaya {
-    background: rgba(224,92,42,0.15);
-    border-color: var(--accent2);
-    color: var(--accent2);
-  }
-  .cb.checked-other {
-    background: rgba(62,207,142,0.15);
-    border-color: var(--check);
-    color: var(--check);
-  }
+/* Checkbox */
+.check-cell{display:flex;justify-content:center;align-items:center;}
+.cb{width:30px;height:30px;border-radius:6px;border:2px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;font-size:17px;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+.cb:active{transform:scale(.85);}
+.cb.c0{background:rgba(240,165,0,.15);border-color:var(--accent);color:var(--accent);}
+.cb.c1{background:rgba(224,92,42,.15);border-color:var(--accent2);color:var(--accent2);}
+.cb.c2{background:rgba(62,207,142,.15);border-color:var(--check);color:var(--check);}
+.cb.c3{background:rgba(167,139,250,.15);border-color:#a78bfa;color:#a78bfa;}
+.cb.c4{background:rgba(56,189,248,.15);border-color:#38bdf8;color:#38bdf8;}
+.cb.c5{background:rgba(251,113,133,.15);border-color:#fb7185;color:#fb7185;}
+.cell-na{text-align:center;font-size:18px;color:var(--border);}
 
-  /* ── Add Store Form ── */
-  .add-section {
-    margin: 12px;
-    background: var(--surface);
-    border: 1px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-  }
-  .add-section h3 {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-  .add-form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .add-form select, .add-form input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: inherit;
-    width: 100%;
-    -webkit-appearance: none;
-  }
-  .add-form select:focus, .add-form input:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .add-btn {
-    background: var(--accent);
-    color: #000;
-    font-weight: 800;
-    border: none;
-    padding: 10px;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: opacity 0.15s;
-  }
-  .add-btn:active { opacity: 0.75; }
+/* Edit col toggle */
+.col-toggle-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+.col-toggle-btn.on{border-color:var(--accent);color:var(--accent);background:rgba(240,165,0,.1);}
+.col-toggle-btn:active{transform:scale(.88);}
 
-  /* ── Supabase Setup Modal ── */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px 20px;
-    width: 100%;
-    max-width: 400px;
-  }
-  .modal h2 {
-    font-size: 16px;
-    color: var(--accent);
-    margin-bottom: 8px;
-  }
-  .modal p { font-size: 12px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
-  .modal input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 10px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    width: 100%;
-    margin-bottom: 10px;
-    font-family: monospace;
-  }
-  .modal input:focus { outline: none; border-color: var(--accent); }
-  .modal-btn {
-    background: var(--accent);
-    color: #000;
-    font-weight: 800;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    width: 100%;
-    font-family: inherit;
-  }
-  .modal-skip {
-    display: block;
-    text-align: center;
-    margin-top: 10px;
-    font-size: 12px;
-    color: var(--muted);
-    cursor: pointer;
-    text-decoration: underline;
-  }
+/* Del btn */
+.del-btn{display:none;width:26px;height:26px;border-radius:6px;border:1px solid #c0392b;background:rgba(192,57,43,.15);color:#e74c3c;font-size:14px;cursor:pointer;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;flex-shrink:0;}
+.del-btn:active{transform:scale(.88);}
+body.edit-mode .del-btn{display:flex;}
 
-  /* ── Toast ── */
-  .toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--check);
-    color: #000;
-    font-weight: 700;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 13px;
-    transition: transform 0.3s;
-    z-index: 300;
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+/* Add store */
+.add-section{margin:8px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius);padding:12px;}
+.add-section h3{font-size:11px;color:var(--muted);margin-bottom:8px;}
+.add-form{display:flex;flex-direction:column;gap:6px;}
+.add-form select,.add-form input[type=text]{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:14px;font-family:inherit;width:100%;-webkit-appearance:none;}
+.add-form select:focus,.add-form input:focus{outline:none;border-color:var(--accent);}
 
-  /* ── Collapsed ── */
-  .pref-body.collapsed { display: none; }
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 16px;width:100%;max-width:360px;max-height:90vh;overflow-y:auto;}
+.modal h2{font-size:15px;color:var(--accent);margin-bottom:8px;}
+.modal p{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;}
+.modal input{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 10px;border-radius:6px;font-size:12px;width:100%;margin-bottom:8px;font-family:monospace;}
+.modal input:focus{outline:none;border-color:var(--accent);}
+.modal-btn{background:var(--accent);color:#000;font-weight:800;border:none;padding:11px;border-radius:8px;font-size:14px;cursor:pointer;width:100%;font-family:inherit;margin-bottom:6px;}
+.modal-skip{display:block;text-align:center;font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;}
+.modal-close{float:right;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;}
 
-  /* ── Edit Mode Toggle ── */
-  .edit-toggle {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 700;
-    padding: 5px 12px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .edit-toggle.active {
-    background: rgba(224,92,42,0.15);
-    border-color: var(--accent2);
-    color: var(--accent2);
-  }
+/* Page editor modal */
+.page-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.page-item{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.page-item-name{flex:1;font-size:13px;font-weight:700;}
+.page-item-active{font-size:10px;color:var(--check);}
+.col-config{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
+.col-badge{font-size:11px;padding:2px 8px;border-radius:12px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:var(--bg);user-select:none;}
+.col-badge.on{border-color:var(--accent);color:var(--accent);background:rgba(240,165,0,.1);}
+.new-page-form{display:flex;gap:6px;}
+.new-page-form input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;font-family:inherit;}
+.new-page-form input:focus{outline:none;border-color:var(--accent);}
 
-  /* ── Delete Button ── */
-  .del-btn {
-    display: none;
-    width: 28px; height: 28px;
-    border-radius: 6px;
-    border: 1px solid #c0392b;
-    background: rgba(192,57,43,0.15);
-    color: #e74c3c;
-    font-size: 16px;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    flex-shrink: 0;
-  }
-  .del-btn:active { transform: scale(0.88); background: rgba(192,57,43,0.4); }
-  body.edit-mode .del-btn { display: flex; }
-  body.edit-mode .store-row { grid-template-columns: 28px 1fr 44px 44px 44px; }
-  body.edit-mode .col-headers { grid-template-columns: 28px 1fr 44px 44px 44px; }
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--check);color:#000;font-weight:700;padding:9px 18px;border-radius:20px;font-size:13px;transition:transform .3s;z-index:300;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
 
-  /* ── Footer ad ── */
-  .footer-ad {
-    margin: 16px 12px 8px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    text-align: center;
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .footer-ad a {
-    display: inline-block;
-    margin: 6px 4px 0;
-    background: linear-gradient(90deg, #ff6a00, #ee0979);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 6px 16px;
-    border-radius: 4px;
-    text-decoration: none;
-  }
+/* Footer ad */
+.footer-ad{margin:12px 8px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px;text-align:center;font-size:11px;color:var(--muted);}
+.footer-ad a{display:inline-block;margin:4px 3px 0;background:linear-gradient(90deg,#ff6a00,#ee0979);color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:4px;text-decoration:none;}
 </style>
 </head>
 <body>
 
-<!-- Setup Modal -->
-<div class="modal-overlay show" id="setupModal">
+<!-- Supabase Modal -->
+<div class="modal-overlay" id="setupModal">
   <div class="modal">
     <h2>🔧 初回設定</h2>
-    <p>全員でチェックを共有するには Supabase の URL と API キーが必要です。<br>
-    <b>supabase.com</b> で無料プロジェクトを作成してください。</p>
+    <p>Supabase の URL と API キーを入力してください。</p>
     <input type="text" id="sbUrl" placeholder="https://xxxx.supabase.co" autocomplete="off">
     <input type="text" id="sbKey" placeholder="anon public key" autocomplete="off">
     <button class="modal-btn" onclick="saveSupabase()">保存して開始</button>
     <span class="modal-skip" onclick="skipSupabase()">ローカル保存で試す（共有なし）</span>
+  </div>
+</div>
+
+<!-- Page Editor Modal -->
+<div class="modal-overlay" id="pageModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closePageModal()">×</button>
+    <h2>📄 ページ管理</h2>
+    <div class="page-list" id="pageList"></div>
+    <div class="new-page-form">
+      <input type="text" id="newPageName" placeholder="新しいページ名（例：アビスアイ）" maxlength="20">
+      <button class="btn btn-primary btn-sm" style="white-space:nowrap;padding:8px 12px;" onclick="addPage()">＋追加</button>
+    </div>
   </div>
 </div>
 
@@ -426,39 +162,35 @@
 <!-- Header -->
 <header>
   <div>
-    <h1>📚 店舗チェックリスト</h1>
-    <div class="header-sub">古本市場 / TSUTAYA / その他</div>
+    <div class="header-title">📚 店舗チェックリスト</div>
+    <div class="header-sub" id="headerSub"></div>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
-    <button class="edit-toggle" id="editToggle" onclick="toggleEditMode()">✏️ 編集</button>
-    <div class="sync-indicator">
-      <div class="sync-dot" id="syncDot" style="background:var(--muted)"></div>
-      <span id="syncStatus">未接続</span>
-    </div>
+  <div class="header-right">
+    <button class="btn btn-sm btn-success" onclick="resetAllChecks()">🗑解除</button>
+    <button class="btn btn-sm btn-edit" id="editToggle" onclick="toggleEditMode()">✏️編集</button>
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncStatus">未接続</span>
   </div>
 </header>
 
-<!-- Ad Top -->
+<!-- Page Tabs -->
+<div class="page-tabs" id="pageTabs"></div>
+
+<!-- Ad -->
 <div class="ad-banner">
-  <div class="ad-label">📦 楽天ブックス</div>
-  <!-- 楽天アフィリエイトバナーをここに貼る -->
+  <div>📦 楽天ブックス</div>
   <a href="https://books.rakuten.co.jp/" target="_blank" id="rakutenAd">楽天ブックスで探す →</a>
 </div>
 
 <!-- Stats -->
-<div class="stats-bar" id="statsBar">
-  <div class="stat-chip">全店舗: <span id="statTotal">0</span></div>
-  <div class="stat-chip">古本市場✓: <span id="statFuru">0</span></div>
-  <div class="stat-chip">TSUTAYA✓: <span id="statTsut">0</span></div>
-  <div class="stat-chip">その他✓: <span id="statOther">0</span></div>
-</div>
+<div class="stats-bar" id="statsBar"></div>
 
 <!-- Store List -->
 <div id="storeList"></div>
 
 <!-- Add Store -->
 <div class="add-section">
-  <h3>＋ 店舗を追加</h3>
+  <h3>＋ 店舗を追加（現在のページ）</h3>
   <div class="add-form">
     <select id="addPref">
       <option value="京都">京都</option>
@@ -468,329 +200,529 @@
       <option value="その他">その他</option>
     </select>
     <input type="text" id="addName" placeholder="店舗名（例：梅田店）">
-    <button class="add-btn" onclick="addStore()">追加する</button>
+    <button class="btn btn-primary" style="padding:10px;font-size:14px;" onclick="addStore()">追加する</button>
   </div>
 </div>
 
 <!-- Footer Ad -->
 <div class="footer-ad">
   <div>📦 Amazonでも探す</div>
-  <!-- AmazonアソシエイトバナーをここにIDを入れて貼る -->
-  <a href="https://www.amazon.co.jp/s?k=%E5%8F%A4%E6%9C%AC&tag=YOUR_ASSOCIATE_TAG" target="_blank" id="amazonAd">Amazon 古本を探す →</a>
+  <a href="https://www.amazon.co.jp/s?k=%E5%8F%A4%E6%9C%AC&tag=YOUR_TAG" target="_blank">Amazon 古本を探す →</a>
 </div>
 
 <script>
-// ── データ定義 ──
-const INITIAL_STORES = {
-  京都: [
-    "太秦店","桃山店","桂店","高野店","西陣店","イオン高の原店","四条河原町店"
-  ],
-  大阪: [
-    "都島店","東豊中","大東店","北加賀屋店","庄内店","久宝寺店","菱江店",
-    "高槻店","南茨木店","千里丘","イオン茨木","くずは","寝屋川","香里園",
-    "門真店","鶴見店","生野店","東住吉","西淀川","東大阪","松原店","緑橋店",
-    "箕面","長吉長原","羽曳野","富田林","中百舌鳥","深井店","泉大津",
-    "日本橋","りんくう泉南店","原山台",
-    "尼崎","伊丹店","イオン伊丹","川西店","宝塚店"
-  ],
-  兵庫: [
-    "西宮店","魚住","灘店","三宮店","名谷","芦屋ベクトル","猪名寺",
-    "野口","神戸北","三田店","大和郡山"
-  ],
-  奈良: [],
+// ═══════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════
+const COL_COLORS = ['c0','c1','c2','c3','c4','c5'];
+const COL_COLOR_MAP = {}; // colId -> color class
+
+// Default columns
+const DEFAULT_COLS = [
+  {id:'furuhon', label:'古本市場'},
+  {id:'tsutaya', label:'TSUTAYA'},
+  {id:'other',   label:'その他'},
+];
+
+// Initial store data: pref -> colId -> [storeName]
+const INIT_DATA = {
+  京都:{
+    furuhon:["太秦店","桃山店","桂店","高野店","西陣店","イオン高の原店","四条河原町店"],
+    tsutaya:[],
+    other:["大垣書店伏見"]
+  },
+  大阪:{
+    furuhon:["都島店","東豊中","大東店","北加賀屋店","庄内店","久宝寺店","菱江店","高槻店","南茨木店","千里丘","イオン茨木","くずは","寝屋川","香里園","門真店","鶴見店","生野店","東住吉","西淀川","東大阪","松原店","緑橋店","箕面","長吉長原","羽曳野","富田林","中百舌鳥","深井店","泉大津","日本橋","りんくう泉南店","原山台","尼崎","伊丹店","イオン伊丹","川西店","宝塚店"],
+    tsutaya:["寝屋川","阿倍野","枚方","八尾"],
+    other:[]
+  },
+  兵庫:{
+    furuhon:["西宮店","魚住","灘店","三宮店","名谷","芦屋ベクトル","猪名寺","野口","神戸北","三田店"],
+    tsutaya:["姫路"],
+    other:[]
+  },
+  奈良:{furuhon:[],tsutaya:[],other:[]}
 };
 
-const TSUTAYA_STORES = {
-  京都: [],
-  大阪: ["寝屋川","阿倍野","枚方","八尾","姫路"],
-  兵庫: [],
-  奈良: [],
-};
-
-const OTHER_STORES = {
-  京都: ["大垣書店伏見"],
-  大阪: [],
-  兵庫: [],
-  奈良: [],
-};
-
-// ── State ──
-let checks = {}; // { "大阪_太秦店_furuhon": true, ... }
-let stores = JSON.parse(JSON.stringify(INITIAL_STORES));
-let tsutayaStores = JSON.parse(JSON.stringify(TSUTAYA_STORES));
-let otherStores = JSON.parse(JSON.stringify(OTHER_STORES));
-let supabaseUrl = '';
-let supabaseKey = '';
-let useSupabase = false;
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+// pages: [{id, name, cols:[{id,label}], stores:{pref:{colId:[name]}}, storeColVis:{pref:{storeName:{colId:bool}}}}]
+let pages = [];
+let currentPageId = '';
+let checks = {}; // "pageId_pref_store_colId" -> true
 let collapsed = {};
+let editMode = false;
+let supabaseUrl = '', supabaseKey = '', useSupabase = false;
 
-// ── Supabase Setup ──
+// ═══════════════════════════════════════
+// PAGE HELPERS
+// ═══════════════════════════════════════
+function currentPage() { return pages.find(p=>p.id===currentPageId)||pages[0]; }
+
+function makeDefaultPage() {
+  return {
+    id: 'p_default',
+    name: '古本市場巡回',
+    cols: JSON.parse(JSON.stringify(DEFAULT_COLS)),
+    stores: JSON.parse(JSON.stringify(INIT_DATA)),
+    storeColVis: {} // pref -> storeName -> colId -> bool (true=visible)
+  };
+}
+
+function getStoreColVis(page, pref, storeName, colId) {
+  // default: visible if store exists in that col
+  if (!page.storeColVis[pref]) return isStoreInCol(page, pref, storeName, colId);
+  if (!page.storeColVis[pref][storeName]) return isStoreInCol(page, pref, storeName, colId);
+  const v = page.storeColVis[pref][storeName][colId];
+  if (v === undefined) return isStoreInCol(page, pref, storeName, colId);
+  return v;
+}
+
+function setStoreColVis(page, pref, storeName, colId, val) {
+  if (!page.storeColVis[pref]) page.storeColVis[pref] = {};
+  if (!page.storeColVis[pref][storeName]) page.storeColVis[pref][storeName] = {};
+  page.storeColVis[pref][storeName][colId] = val;
+}
+
+function isStoreInCol(page, pref, storeName, colId) {
+  return !!(page.stores[pref] && page.stores[pref][colId] && page.stores[pref][colId].includes(storeName));
+}
+
+function allStoreNames(page, pref) {
+  const nameSet = new Set();
+  for (const col of page.cols) {
+    (page.stores[pref]?.[col.id] || []).forEach(n => nameSet.add(n));
+  }
+  return [...nameSet];
+}
+
+function colColorClass(colId, pageId) {
+  const key = pageId + '_' + colId;
+  if (!COL_COLOR_MAP[key]) {
+    const page = pages.find(p=>p.id===pageId);
+    if (page) {
+      const idx = page.cols.findIndex(c=>c.id===colId);
+      COL_COLOR_MAP[key] = COL_COLORS[idx % COL_COLORS.length];
+    }
+  }
+  return COL_COLOR_MAP[key] || 'c0';
+}
+
+// ═══════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════
 function saveSupabase() {
   supabaseUrl = document.getElementById('sbUrl').value.trim();
   supabaseKey = document.getElementById('sbKey').value.trim();
-  if (!supabaseUrl || !supabaseKey) {
-    alert('URLとキーを両方入力してください');
-    return;
-  }
+  if (!supabaseUrl || !supabaseKey) { alert('両方入力してください'); return; }
   localStorage.setItem('sb_url', supabaseUrl);
   localStorage.setItem('sb_key', supabaseKey);
   useSupabase = true;
   document.getElementById('setupModal').classList.remove('show');
   initSupabase();
 }
-
 function skipSupabase() {
   useSupabase = false;
   document.getElementById('setupModal').classList.remove('show');
   document.getElementById('syncStatus').textContent = 'ローカル';
-  loadLocal();
-  render();
+  loadLocal(); render();
 }
-
 async function initSupabase() {
-  document.getElementById('syncDot').style.background = 'var(--accent)';
+  const dot = document.getElementById('syncDot');
+  dot.style.background = 'var(--accent)'; dot.classList.add('on');
   document.getElementById('syncStatus').textContent = '接続中...';
   try {
-    await ensureTable();
+    const res = await sbFetch('GET', '/rest/v1/checklist?limit=1');
+    if (!res.ok) throw new Error('no table');
     await loadFromSupabase();
-    document.getElementById('syncDot').style.background = 'var(--check)';
-    document.getElementById('syncStatus').textContent = 'リアルタイム同期';
-    startPolling();
+    dot.style.background = 'var(--check)';
+    document.getElementById('syncStatus').textContent = '同期中';
+    setInterval(()=>{ if(useSupabase) loadFromSupabase(); }, 5000);
   } catch(e) {
-    console.error(e);
-    document.getElementById('syncDot').style.background = '#e05c2a';
+    dot.style.background = '#e05c2a'; dot.classList.remove('on');
     document.getElementById('syncStatus').textContent = 'エラー';
-    showToast('Supabase接続失敗。ローカル保存に切り替え');
-    useSupabase = false;
-    loadLocal();
-    render();
+    showToast('Supabase接続失敗。ローカル保存で動作します');
+    useSupabase = false; loadLocal(); render();
   }
 }
-
-async function ensureTable() {
-  // テーブル存在確認（REST API経由）
-  const res = await sbFetch('GET', '/rest/v1/checklist?limit=1');
-  if (!res.ok && res.status === 404) throw new Error('テーブルなし');
-}
-
 async function sbFetch(method, path, body) {
-  const opts = {
-    method,
-    headers: {
-      'apikey': supabaseKey,
-      'Authorization': 'Bearer ' + supabaseKey,
-      'Content-Type': 'application/json',
-      'Prefer': method === 'POST' ? 'resolution=merge-duplicates' : ''
-    }
-  };
+  const opts = {method, headers:{'apikey':supabaseKey,'Authorization':'Bearer '+supabaseKey,'Content-Type':'application/json','Prefer':method==='POST'?'resolution=merge-duplicates':''}};
   if (body) opts.body = JSON.stringify(body);
   return fetch(supabaseUrl + path, opts);
 }
-
 async function loadFromSupabase() {
   const res = await sbFetch('GET', '/rest/v1/checklist?select=key,checked');
   const data = await res.json();
   checks = {};
-  for (const row of data) {
-    if (row.checked) checks[row.key] = true;
+  for (const row of data) if(row.checked) checks[row.key] = true;
+
+  // load pages from supabase meta table
+  try {
+    const r2 = await sbFetch('GET', '/rest/v1/checklist_meta?select=key,value');
+    const meta = await r2.json();
+    for (const row of meta) {
+      if (row.key === 'pages') pages = JSON.parse(row.value);
+      if (row.key === 'currentPage') currentPageId = row.value;
+    }
+    if (!pages.length) initDefaultPages();
+    if (!currentPageId || !pages.find(p=>p.id===currentPageId)) currentPageId = pages[0].id;
+  } catch(e) {
+    initDefaultPages();
   }
   render();
 }
-
 async function saveToSupabase(key, checked) {
-  await sbFetch('POST', '/rest/v1/checklist', [{ key, checked }]);
+  await sbFetch('POST', '/rest/v1/checklist', [{key, checked}]);
+}
+async function saveMetaToSupabase() {
+  if (!useSupabase) return;
+  try {
+    await sbFetch('POST', '/rest/v1/checklist_meta', [{key:'pages', value:JSON.stringify(pages)},{key:'currentPage', value:currentPageId}]);
+  } catch(e) {}
 }
 
-function startPolling() {
-  setInterval(async () => {
-    if (useSupabase) {
-      await loadFromSupabase();
-    }
-  }, 5000);
-}
-
-// ── LocalStorage ──
+// ═══════════════════════════════════════
+// LOCAL STORAGE
+// ═══════════════════════════════════════
 function loadLocal() {
-  const saved = localStorage.getItem('checklist_checks');
-  if (saved) checks = JSON.parse(saved);
-  const savedStores = localStorage.getItem('checklist_stores');
-  if (savedStores) stores = JSON.parse(savedStores);
+  try {
+    const c = localStorage.getItem('cl2_checks'); if(c) checks = JSON.parse(c);
+    const p = localStorage.getItem('cl2_pages'); if(p) pages = JSON.parse(p);
+    const cp = localStorage.getItem('cl2_currentPage'); if(cp) currentPageId = cp;
+  } catch(e) {}
+  if (!pages.length) initDefaultPages();
+  if (!currentPageId || !pages.find(p=>p.id===currentPageId)) currentPageId = pages[0].id;
 }
-
 function saveLocal() {
-  localStorage.setItem('checklist_checks', JSON.stringify(checks));
-  localStorage.setItem('checklist_stores', JSON.stringify(stores));
+  localStorage.setItem('cl2_checks', JSON.stringify(checks));
+  localStorage.setItem('cl2_pages', JSON.stringify(pages));
+  localStorage.setItem('cl2_currentPage', currentPageId);
 }
 
-// ── Toggle ──
-async function toggle(key, type) {
-  const isChecked = !checks[key];
-  if (isChecked) checks[key] = true;
-  else delete checks[key];
+function initDefaultPages() {
+  pages = [makeDefaultPage()];
+  currentPageId = pages[0].id;
+}
 
-  if (useSupabase) {
-    await saveToSupabase(key, isChecked);
-  } else {
-    saveLocal();
-  }
+// ═══════════════════════════════════════
+// PAGE MANAGEMENT
+// ═══════════════════════════════════════
+function addPage() {
+  const name = document.getElementById('newPageName').value.trim();
+  if (!name) return;
+  const id = 'p_' + Date.now();
+  pages.push({id, name, cols:[], stores:{}, storeColVis:{}});
+  document.getElementById('newPageName').value = '';
+  persistAll();
+  renderPageModal();
+  showToast('✅ ページ「'+name+'」を追加しました');
+}
+function deletePage(id) {
+  if (pages.length <= 1) { showToast('最後のページは削除できません'); return; }
+  if (!confirm('このページを削除しますか？')) return;
+  pages = pages.filter(p=>p.id!==id);
+  if (currentPageId === id) currentPageId = pages[0].id;
+  persistAll();
+  renderPageModal();
   render();
-  showToast(isChecked ? '✅ チェックしました' : '☐ 外しました');
 }
-
-// ── Edit Mode ──
-let editMode = false;
-function toggleEditMode() {
-  editMode = !editMode;
-  document.body.classList.toggle('edit-mode', editMode);
-  const btn = document.getElementById('editToggle');
-  btn.textContent = editMode ? '✅ 完了' : '✏️ 編集';
-  btn.classList.toggle('active', editMode);
-}
-
-// ── Delete Store ──
-async function deleteStore(pref, name) {
-  if (!confirm(`「${name}」を削除しますか？`)) return;
-
-  // 全リストから削除
-  ['stores','tsutayaStores','otherStores'].forEach(listName => {
-    const list = eval(listName);
-    if (list[pref]) {
-      const idx = list[pref].indexOf(name);
-      if (idx !== -1) list[pref].splice(idx, 1);
-    }
-  });
-
-  // チェックデータも削除
-  ['furuhon','tsutaya','other'].forEach(type => {
-    const key = `${pref}_${name}_${type}`;
-    delete checks[key];
-    if (useSupabase) saveToSupabase(key, false);
-  });
-
-  if (!useSupabase) saveLocal();
+function switchPage(id) {
+  currentPageId = id;
+  if (!useSupabase) localStorage.setItem('cl2_currentPage', id);
   render();
-  showToast('🗑 ' + name + ' を削除しました');
 }
 
-// ── Add Store ──
+// ═══════════════════════════════════════
+// COLUMN MANAGEMENT (per page)
+// ═══════════════════════════════════════
+function addColToPage(pageId, label) {
+  const page = pages.find(p=>p.id===pageId);
+  if (!page) return;
+  if (page.cols.some(c=>c.label===label)) { showToast('同じ列名が既にあります'); return; }
+  const id = 'col_'+Date.now();
+  page.cols.push({id, label});
+  persistAll();
+  renderPageModal();
+  render();
+}
+function removeColFromPage(pageId, colId) {
+  const page = pages.find(p=>p.id===pageId);
+  if (!page) return;
+  page.cols = page.cols.filter(c=>c.id!==colId);
+  persistAll();
+  renderPageModal();
+  render();
+}
+
+// ═══════════════════════════════════════
+// STORE MANAGEMENT
+// ═══════════════════════════════════════
 function addStore() {
   const pref = document.getElementById('addPref').value;
   const name = document.getElementById('addName').value.trim();
   if (!name) return;
-  if (!stores[pref]) stores[pref] = [];
-  stores[pref].push(name);
+  const page = currentPage();
+  if (!page) return;
+  if (!page.stores[pref]) page.stores[pref] = {};
+  // add to first col if exists, otherwise just register
+  if (page.cols.length > 0) {
+    const colId = page.cols[0].id;
+    if (!page.stores[pref][colId]) page.stores[pref][colId] = [];
+    if (!page.stores[pref][colId].includes(name)) {
+      page.stores[pref][colId].push(name);
+      // set visibility for this col
+      setStoreColVis(page, pref, name, colId, true);
+    }
+  } else {
+    // no cols yet, just add to furuhon-like placeholder
+    if (!page.stores[pref]['_']) page.stores[pref]['_'] = [];
+    page.stores[pref]['_'].push(name);
+  }
   document.getElementById('addName').value = '';
-  if (!useSupabase) saveLocal();
+  persistAll();
   render();
-  showToast('✅ ' + pref + ' に追加しました');
+  showToast('✅ '+pref+' に「'+name+'」を追加しました');
 }
 
-// ── Render ──
+function deleteStore(pageId, pref, name) {
+  if (!confirm(`「${name}」を削除しますか？`)) return;
+  const page = pages.find(p=>p.id===pageId);
+  if (!page) return;
+  for (const col of page.cols) {
+    if (page.stores[pref]?.[col.id]) {
+      page.stores[pref][col.id] = page.stores[pref][col.id].filter(n=>n!==name);
+    }
+    const key = `${pageId}_${pref}_${name}_${col.id}`;
+    delete checks[key];
+    if (useSupabase) saveToSupabase(key, false);
+  }
+  if (page.storeColVis[pref]) delete page.storeColVis[pref][name];
+  persistAll();
+  render();
+  showToast('🗑 '+name+' を削除しました');
+}
+
+// Toggle store col visibility
+function toggleStoreColVis(pageId, pref, storeName, colId) {
+  const page = pages.find(p=>p.id===pageId);
+  if (!page) return;
+  const cur = getStoreColVis(page, pref, storeName, colId);
+  setStoreColVis(page, pref, storeName, colId, !cur);
+  // if hiding, also uncheck
+  if (cur) {
+    const key = `${pageId}_${pref}_${storeName}_${colId}`;
+    delete checks[key];
+    if (useSupabase) saveToSupabase(key, false);
+  }
+  persistAll();
+  render();
+}
+
+// ═══════════════════════════════════════
+// CHECKS
+// ═══════════════════════════════════════
+async function toggle(key) {
+  const isChecked = !checks[key];
+  if (isChecked) checks[key] = true; else delete checks[key];
+  if (useSupabase) await saveToSupabase(key, isChecked);
+  else saveLocal();
+  render();
+  showToast(isChecked ? '✅ チェックしました' : '☐ 外しました');
+}
+
+async function resetAllChecks() {
+  if (!confirm('現在のページの全チェックを解除しますか？')) return;
+  const page = currentPage();
+  if (!page) return;
+  const prefix = page.id + '_';
+  const keys = Object.keys(checks).filter(k=>k.startsWith(prefix));
+  keys.forEach(k=>delete checks[k]);
+  if (useSupabase) for(const k of keys) await saveToSupabase(k, false);
+  else saveLocal();
+  render();
+  showToast('🗑 全チェックを解除しました');
+}
+
+// ═══════════════════════════════════════
+// EDIT MODE
+// ═══════════════════════════════════════
+function toggleEditMode() {
+  editMode = !editMode;
+  document.body.classList.toggle('edit-mode', editMode);
+  const btn = document.getElementById('editToggle');
+  btn.textContent = editMode ? '✅完了' : '✏️編集';
+  btn.classList.toggle('active', editMode);
+  render();
+}
+
+// ═══════════════════════════════════════
+// PERSIST
+// ═══════════════════════════════════════
+function persistAll() {
+  if (useSupabase) saveMetaToSupabase();
+  else saveLocal();
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
 function render() {
+  renderPageTabs();
+  const page = currentPage();
+  if (!page) return;
+
+  document.getElementById('headerSub').textContent = page.cols.map(c=>c.label).join(' / ') || 'ページを編集して列を追加';
+
+  const cols = page.cols;
+  const nCols = cols.length;
+  const colW = nCols <= 3 ? '44px' : nCols <= 5 ? '38px' : '32px';
+  const delW = editMode ? '26px ' : '';
+  const visW = editMode ? '' : '';
+  const gt = `${delW}1fr ${cols.map(()=>colW).join(' ')} ${editMode ? cols.map(()=>'28px').join(' ') : ''}`;
+
   const container = document.getElementById('storeList');
   container.innerHTML = '';
 
-  let totalStores = 0, furuCount = 0, tsutCount = 0, otherCount = 0;
+  let totalStores = 0;
+  const colCounts = {};
+  cols.forEach(c=>colCounts[c.id]=0);
 
-  const allPrefs = [...new Set([
-    ...Object.keys(stores),
-    ...Object.keys(tsutayaStores),
-    ...Object.keys(otherStores)
-  ])];
+  const allPrefs = [...new Set(Object.keys(page.stores))];
 
   for (const pref of allPrefs) {
-    const furuList = stores[pref] || [];
-    const tsutList = tsutayaStores[pref] || [];
-    const otherList = otherStores[pref] || [];
-    const allNames = [...new Set([...furuList, ...tsutList, ...otherList])];
-    if (allNames.length === 0) continue;
+    const names = allStoreNames(page, pref);
+    if (!names.length) continue;
+    totalStores += names.length;
 
-    totalStores += allNames.length;
+    let prefChecks = 0;
+    for (const name of names) {
+      for (const col of cols) {
+        const vis = getStoreColVis(page, pref, name, col.id);
+        if (vis && checks[`${page.id}_${pref}_${name}_${col.id}`]) { colCounts[col.id]++; prefChecks++; }
+      }
+    }
 
-    const isCollapsed = collapsed[pref];
+    const isCollapsed = collapsed[pref+page.id];
     const div = document.createElement('div');
     div.className = 'prefecture';
 
-    // Count checks for this pref
-    let pFuru = 0, pTsut = 0, pOther = 0;
-    for (const name of allNames) {
-      if (checks[`${pref}_${name}_furuhon`]) pFuru++;
-      if (checks[`${pref}_${name}_tsutaya`]) pTsut++;
-      if (checks[`${pref}_${name}_other`]) pOther++;
-    }
-    furuCount += pFuru;
-    tsutCount += pTsut;
-    otherCount += pOther;
+    const colHeaderHtml = cols.map(col=>`<span>${col.label.replace('古本市場','古本<br>市場').replace('TSUTAYA','TSU<br>TAYA')}</span>`).join('');
+    const visHeaderHtml = editMode ? cols.map(()=>`<span style="font-size:9px;color:var(--muted);text-align:center">表示</span>`).join('') : '';
+
+    const rowsHtml = names.map(name => {
+      const nameEsc = name.replace(/'/g,"\\'");
+      const checkCells = cols.map((col,i) => {
+        const vis = getStoreColVis(page, pref, name, col.id);
+        const key = `${page.id}_${pref}_${name}_${col.id}`;
+        const isChecked = checks[key];
+        const cls = colColorClass(col.id, page.id);
+        if (!vis) return `<span class="check-cell"><span class="cell-na">—</span></span>`;
+        return `<span class="check-cell"><span class="cb ${isChecked?cls:''}" onclick="toggle('${key}')">${isChecked?'✓':''}</span></span>`;
+      }).join('');
+
+      const visToggles = editMode ? cols.map(col => {
+        const vis = getStoreColVis(page, pref, name, col.id);
+        return `<span class="check-cell"><span class="col-toggle-btn ${vis?'on':''}" onclick="toggleStoreColVis('${page.id}','${pref}','${nameEsc}','${col.id}')">${vis?'✓':'—'}</span></span>`;
+      }).join('') : '';
+
+      return `<div class="store-row" style="grid-template-columns:${gt}">
+        ${editMode ? `<span class="del-btn" onclick="deleteStore('${page.id}','${pref}','${nameEsc}')">🗑</span>` : ''}
+        <span class="store-name">${name}</span>
+        ${checkCells}
+        ${visToggles}
+      </div>`;
+    }).join('');
 
     div.innerHTML = `
-      <div class="pref-header" onclick="toggleCollapse('${pref}')">
+      <div class="pref-header" onclick="toggleCollapse('${pref+page.id}')">
         <span class="pref-label">${pref}</span>
-        <span>${allNames.length}店舗</span>
-        <span class="pref-count">${pFuru+pTsut+pOther}件チェック済み</span>
-        <span class="pref-toggle">${isCollapsed ? '▶' : '▼'}</span>
+        <span class="pref-info">${names.length}店舗</span>
+        <span class="pref-count">${prefChecks}件チェック</span>
+        <span class="pref-arrow">${isCollapsed?'▶':'▼'}</span>
       </div>
-      <div class="pref-body ${isCollapsed ? 'collapsed' : ''}">
-        <div class="col-headers">
-          <span class="store-col" style="grid-column:1/3">店舗名</span>
-          <span>古本<br>市場</span>
-          <span>TSU<br>TAYA</span>
-          <span>その<br>他</span>
+      <div class="pref-body${isCollapsed?' collapsed':''}">
+        <div class="col-headers" style="grid-template-columns:${gt}">
+          ${editMode?'<span></span>':''}
+          <span class="lbl">店舗名</span>
+          ${colHeaderHtml}
+          ${visHeaderHtml}
         </div>
-        ${allNames.map(name => {
-          const fk = `${pref}_${name}_furuhon`;
-          const tk = `${pref}_${name}_tsutaya`;
-          const ok = `${pref}_${name}_other`;
-          const fHas = furuList.includes(name);
-          const tHas = tsutList.includes(name);
-          const oHas = otherList.includes(name);
-          const nameEsc = name.replace(/'/g, "\\'");
-          return `
-          <div class="store-row">
-            <span class="del-btn" onclick="deleteStore('${pref}','${nameEsc}')">🗑</span>
-            <span class="store-name">${name}</span>
-            <span class="check-cell">
-              ${fHas ? `<span class="cb ${checks[fk]?'checked-furuhon':''}" onclick="toggle('${fk}','furuhon')">${checks[fk]?'✓':''}</span>` : '<span style="color:var(--border)">—</span>'}
-            </span>
-            <span class="check-cell">
-              ${tHas ? `<span class="cb ${checks[tk]?'checked-tsutaya':''}" onclick="toggle('${tk}','tsutaya')">${checks[tk]?'✓':''}</span>` : '<span style="color:var(--border)">—</span>'}
-            </span>
-            <span class="check-cell">
-              ${oHas ? `<span class="cb ${checks[ok]?'checked-other':''}" onclick="toggle('${ok}','other')">${checks[ok]?'✓':''}</span>` : '<span style="color:var(--border)">—</span>'}
-            </span>
-          </div>`;
-        }).join('')}
-      </div>
-    `;
+        ${rowsHtml}
+      </div>`;
     container.appendChild(div);
   }
 
-  document.getElementById('statTotal').textContent = totalStores;
-  document.getElementById('statFuru').textContent = furuCount;
-  document.getElementById('statTsut').textContent = tsutCount;
-  document.getElementById('statOther').textContent = otherCount;
+  // Stats
+  const statsEl = document.getElementById('statsBar');
+  statsEl.innerHTML = `<div class="stat-chip">全店舗: <span>${totalStores}</span></div>`
+    + cols.map(col=>`<div class="stat-chip">${col.label}✓: <span>${colCounts[col.id]}</span></div>`).join('');
 }
 
-function toggleCollapse(pref) {
-  collapsed[pref] = !collapsed[pref];
-  render();
+function toggleCollapse(key) { collapsed[key]=!collapsed[key]; render(); }
+
+function renderPageTabs() {
+  const el = document.getElementById('pageTabs');
+  el.innerHTML = pages.map(p=>`
+    <div class="page-tab ${p.id===currentPageId?'active':''}" onclick="switchPage('${p.id}')">${p.name}</div>
+  `).join('') + `<div class="page-tab-add" onclick="openPageModal()">＋</div>`;
 }
 
-// ── Toast ──
+// ═══════════════════════════════════════
+// PAGE MODAL
+// ═══════════════════════════════════════
+function openPageModal() {
+  document.getElementById('pageModal').classList.add('show');
+  renderPageModal();
+}
+function closePageModal() {
+  document.getElementById('pageModal').classList.remove('show');
+}
+function renderPageModal() {
+  const el = document.getElementById('pageList');
+  el.innerHTML = pages.map(page => {
+    const colBadges = page.cols.map((col,i)=>{
+      const cls = COL_COLORS[i%COL_COLORS.length];
+      return `<span class="col-badge on" style="border-color:currentColor" onclick="removeColFromPage('${page.id}','${col.id}')">${col.label} ×</span>`;
+    }).join('');
+
+    return `<div class="page-item">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+          <span class="page-item-name">${page.name}</span>
+          ${page.id===currentPageId?'<span class="page-item-active">● 表示中</span>':''}
+          <button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="deletePage('${page.id}')">削除</button>
+        </div>
+        <div class="col-config">
+          ${colBadges}
+          <input type="text" id="newCol_${page.id}" placeholder="列を追加..." maxlength="15"
+            style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:2px 8px;border-radius:12px;font-size:11px;font-family:inherit;width:100px;"
+            onkeydown="if(event.key==='Enter'){addColToPage('${page.id}',this.value.trim());this.value='';}">
+          <button class="btn btn-sm btn-purple" onclick="addColToPage('${page.id}',document.getElementById('newCol_${page.id}').value.trim());document.getElementById('newCol_${page.id}').value='';">＋</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
 let toastTimer;
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-// ── Init ──
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
   supabaseUrl = 'https://stgsbuqwhbppwuboqpub.supabase.co';
   supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0Z3NidXF3aGJwcHd1Ym9xcHViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTgzMDEsImV4cCI6MjA5ODAzNDMwMX0.UKEF5lAB-EH73kZIjovqI9lpNJhtgpqt-F609r6oA4k';
   useSupabase = true;
-  document.getElementById('setupModal').classList.remove('show');
   initSupabase();
 });
 </script>

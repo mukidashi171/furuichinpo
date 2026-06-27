@@ -275,7 +275,7 @@ function currentPage() { return pages.find(p=>p.id===currentPageId)||pages[0]; }
 function makeDefaultPage() {
   return {
     id: 'p_default',
-    name: '古本市場巡回',
+    name: 'テンプレ',
     cols: JSON.parse(JSON.stringify(DEFAULT_COLS)),
     stores: JSON.parse(JSON.stringify(INIT_DATA)),
     storeColVis: {} // pref -> storeName -> colId -> bool (true=visible)
@@ -375,10 +375,16 @@ async function loadFromSupabase() {
     const meta = await r2.json();
     for (const row of meta) {
       if (row.key === 'pages') pages = JSON.parse(row.value);
-      if (row.key === 'currentPage') currentPageId = row.value;
+      // currentPageはローカルで管理（各自の選択を保持）
     }
     if (!pages.length) initDefaultPages();
-    if (!currentPageId || !pages.find(p=>p.id===currentPageId)) currentPageId = pages[0].id;
+    // ローカルのcurrentPageIdを維持、なければ先頭
+    const savedPage = localStorage.getItem('cl2_currentPage');
+    if (savedPage && pages.find(p=>p.id===savedPage)) {
+      currentPageId = savedPage;
+    } else {
+      currentPageId = pages[0].id;
+    }
   } catch(e) {
     initDefaultPages();
   }
@@ -390,7 +396,8 @@ async function saveToSupabase(key, checked) {
 async function saveMetaToSupabase() {
   if (!useSupabase) return;
   try {
-    await sbFetch('POST', '/rest/v1/checklist_meta', [{key:'pages', value:JSON.stringify(pages)},{key:'currentPage', value:currentPageId}]);
+    // currentPageはSupabaseに保存しない（各自のローカルで管理）
+    await sbFetch('POST', '/rest/v1/checklist_meta', [{key:'pages', value:JSON.stringify(pages)}]);
   } catch(e) {}
 }
 
@@ -456,7 +463,7 @@ function deletePage(id) {
 }
 function switchPage(id) {
   currentPageId = id;
-  if (!useSupabase) localStorage.setItem('cl2_currentPage', id);
+  localStorage.setItem('cl2_currentPage', id); // 常にローカルに保存
   render();
 }
 
@@ -737,9 +744,16 @@ function renderAfterMain() { renderAds(); }
 
 function renderPageTabs() {
   const el = document.getElementById('pageTabs');
-  el.innerHTML = pages.map(p=>`
-    <div class="page-tab ${p.id===currentPageId?'active':''}" onclick="switchPage('${p.id}')">${p.name}</div>
-  `).join('') + `<div class="page-tab-add" onclick="openPageModal()">＋</div>`;
+  el.innerHTML = pages
+    .filter(p => editMode || p.id !== 'p_default') // テンプレは編集モード時のみ表示
+    .map(p=>`
+      <div class="page-tab ${p.id===currentPageId?'active':''}" onclick="switchPage('${p.id}')">${p.name}${p.id==='p_default'?'<span style="font-size:9px;margin-left:3px;opacity:.6;">📋</span>':''}</div>
+    `).join('') + `<div class="page-tab-add" onclick="openPageModal()">＋</div>`;
+  // テンプレが表示中なのに編集モードを終了したら先頭の非テンプレページへ
+  if (!editMode && currentPageId === 'p_default') {
+    const nonTemplate = pages.find(p=>p.id !== 'p_default');
+    if (nonTemplate) { currentPageId = nonTemplate.id; localStorage.setItem('cl2_currentPage', currentPageId); }
+  }
 }
 
 // ═══════════════════════════════════════

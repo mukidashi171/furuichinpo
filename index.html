@@ -2,8 +2,13 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>店舗チェックリスト</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f1117">
+<meta name="description" content="関西エリアの古本市場・TSUTAYA・その他店舗でのTCG在庫をリアルタイムで共有するチェックリスト">
+<meta property="og:title" content="関西TCG店舗チェックリスト">
+<meta property="og:description" content="古本市場・TSUTAYA・その他店舗のTCG在庫をみんなで共有">
+<meta property="og:type" content="website">
+<title>関西TCG店舗チェックリスト</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -11,7 +16,17 @@
   --accent:#f0a500;--accent2:#e05c2a;--text:#e8e8f0;
   --muted:#7a7d94;--check:#3ecf8e;--border:#2e3148;--radius:10px;
 }
-body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px;}
+body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px;-webkit-text-size-adjust:100%;}
+/* スマホ最適化 */
+@media(max-width:480px){
+  .pref-header{padding:10px 10px;}
+  .store-row{min-height:46px;}
+  .cb{width:34px;height:34px;font-size:19px;}
+  .col-toggle-btn{width:32px;height:32px;}
+  .del-btn{width:30px;height:30px;}
+  .add-form select,.add-form input[type=text]{font-size:16px;} /* iOS zoom防止 */
+  .new-page-form input{font-size:16px;}
+}
 
 /* Header */
 header{background:linear-gradient(135deg,var(--surface),#1e1430);border-bottom:2px solid var(--accent);padding:10px 12px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:8px;}
@@ -392,7 +407,13 @@ async function loadFromSupabase() {
       currentPageId = pages[0].id;
     }
   } catch(e) {
-    initDefaultPages();
+    // checklist_metaテーブルがない場合はローカルから読み込み
+    const savedP = localStorage.getItem('cl2_pages');
+    if (savedP) try { pages = JSON.parse(savedP); } catch(e2) {}
+    if (!pages.length) initDefaultPages();
+    const savedCP = localStorage.getItem('cl2_currentPage');
+    if (savedCP && pages.find(p=>p.id===savedCP)) currentPageId = savedCP;
+    else currentPageId = pages[0].id;
   }
   render();
 }

@@ -153,6 +153,10 @@ body.edit-mode .del-btn{display:flex;}
       <input type="text" id="newPageName" placeholder="新しいページ名（例：アビスアイ）" maxlength="20">
       <button class="btn btn-primary btn-sm" style="white-space:nowrap;padding:8px 12px;" onclick="addPage()">＋追加</button>
     </div>
+    <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--muted);cursor:pointer;">
+      <input type="checkbox" id="newPageTemplate" checked style="width:14px;height:14px;accent-color:var(--accent);">
+      テンプレート（店舗・列）をコピーして作成
+    </label>
   </div>
 </div>
 
@@ -177,9 +181,9 @@ body.edit-mode .del-btn{display:flex;}
 <div class="page-tabs" id="pageTabs"></div>
 
 <!-- Ad -->
-<div class="ad-banner">
-  <div>📦 楽天ブックス</div>
-  <a href="https://books.rakuten.co.jp/" target="_blank" id="rakutenAd">楽天ブックスで探す →</a>
+<div class="ad-banner" id="adBanner">
+  <div id="adLabel" style="margin-bottom:3px;">📦 カード検索</div>
+  <div id="adLinks" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
 </div>
 
 <!-- Stats -->
@@ -205,9 +209,9 @@ body.edit-mode .del-btn{display:flex;}
 </div>
 
 <!-- Footer Ad -->
-<div class="footer-ad">
-  <div>📦 Amazonでも探す</div>
-  <a href="https://www.amazon.co.jp/s?k=%E5%8F%A4%E6%9C%AC&tag=YOUR_TAG" target="_blank">Amazon 古本を探す →</a>
+<div class="footer-ad" id="footerAd">
+  <div style="margin-bottom:4px;">🛒 Amazonでも探す</div>
+  <div id="footerAdLinks" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
 </div>
 
 <script>
@@ -411,8 +415,23 @@ function initDefaultPages() {
 function addPage() {
   const name = document.getElementById('newPageName').value.trim();
   if (!name) return;
+  const useTemplate = document.getElementById('newPageTemplate').checked;
   const id = 'p_' + Date.now();
-  pages.push({id, name, cols:[], stores:{}, storeColVis:{}});
+  let newPage;
+  if (useTemplate) {
+    // テンプレ（デフォルトページ）からディープコピー
+    const tmpl = makeDefaultPage();
+    newPage = {
+      id,
+      name,
+      cols: JSON.parse(JSON.stringify(tmpl.cols)),
+      stores: JSON.parse(JSON.stringify(tmpl.stores)),
+      storeColVis: {}
+    };
+  } else {
+    newPage = {id, name, cols:[], stores:{}, storeColVis:{}};
+  }
+  pages.push(newPage);
   document.getElementById('newPageName').value = '';
   persistAll();
   renderPageModal();
@@ -431,6 +450,44 @@ function switchPage(id) {
   currentPageId = id;
   if (!useSupabase) localStorage.setItem('cl2_currentPage', id);
   render();
+}
+
+
+// ═══════════════════════════════════════
+// ADS
+// ═══════════════════════════════════════
+const RAKUTEN_ID = '0101'; // 楽天アフィリエイトID
+const AMAZON_TAG = 'unchanchikubi-22'; // ← AmazonアソシエイトIDに差し替え
+
+const TCG_KEYWORDS = [
+  {label:'🎴 ポケカ',     kw:'ポケモンカード'},
+  {label:'⚔️ ワンピース', kw:'ワンピースカードゲーム'},
+  {label:'🐉 ドラゴンボール', kw:'ドラゴンボールカードゲーム'},
+  {label:'✨ ロルカナ',   kw:'ロルカナ'},
+  {label:'🎲 遊戯王',    kw:'遊戯王カード'},
+];
+
+function rakutenUrl(kw) {
+  const encoded = encodeURIComponent(kw);
+  return `https://search.rakuten.co.jp/search/mall/${encoded}/?scid=af_pc_etc&sc2id=af_101_0_0&rafmid=${RAKUTEN_ID}`;
+}
+function amazonUrl(kw) {
+  const encoded = encodeURIComponent(kw);
+  return `https://www.amazon.co.jp/s?k=${encoded}&tag=${AMAZON_TAG}`;
+}
+
+function renderAds() {
+  const adLinks = document.getElementById('adLinks');
+  const footerLinks = document.getElementById('footerAdLinks');
+  if (!adLinks || !footerLinks) return;
+
+  adLinks.innerHTML = TCG_KEYWORDS.map(t =>
+    `<a href="${rakutenUrl(t.kw)}" target="_blank" style="display:inline-block;background:linear-gradient(90deg,#bf0000,#e00);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;text-decoration:none;">${t.label} 楽天</a>`
+  ).join('');
+
+  footerLinks.innerHTML = TCG_KEYWORDS.map(t =>
+    `<a href="${amazonUrl(t.kw)}" target="_blank" style="display:inline-block;background:linear-gradient(90deg,#ff6a00,#ee0979);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;text-decoration:none;">${t.label} Amazon</a>`
+  ).join('');
 }
 
 // ═══════════════════════════════════════
@@ -657,9 +714,13 @@ function render() {
   const statsEl = document.getElementById('statsBar');
   statsEl.innerHTML = `<div class="stat-chip">全店舗: <span>${totalStores}</span></div>`
     + cols.map(col=>`<div class="stat-chip">${col.label}✓: <span>${colCounts[col.id]}</span></div>`).join('');
+
+  renderAds();
 }
 
 function toggleCollapse(key) { collapsed[key]=!collapsed[key]; render(); }
+
+function renderAfterMain() { renderAds(); }
 
 function renderPageTabs() {
   const el = document.getElementById('pageTabs');

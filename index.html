@@ -180,10 +180,14 @@ body.edit-mode .del-btn{display:flex;}
 <!-- Page Tabs -->
 <div class="page-tabs" id="pageTabs"></div>
 
-<!-- Ad -->
+<!-- Ad Top -->
 <div class="ad-banner" id="adBanner">
-  <div id="adLabel" style="margin-bottom:3px;">📦 カード検索</div>
-  <div id="adLinks" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
+  <div style="font-size:10px;color:#e74c3c;font-weight:800;margin-bottom:4px;">🔔 再入荷情報！</div>
+  <div style="font-size:10px;color:var(--muted);margin-bottom:5px;">Sponsored</div>
+  <div style="margin-bottom:4px;font-size:10px;color:var(--muted);">楽天市場で在庫確認</div>
+  <div id="adLinksRakuten" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:6px;"></div>
+  <div style="margin-bottom:4px;font-size:10px;color:var(--muted);">Amazonで在庫確認</div>
+  <div id="adLinksAmazon" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
 </div>
 
 <!-- Stats -->
@@ -210,8 +214,12 @@ body.edit-mode .del-btn{display:flex;}
 
 <!-- Footer Ad -->
 <div class="footer-ad" id="footerAd">
-  <div style="margin-bottom:4px;">🛒 Amazonでも探す</div>
-  <div id="footerAdLinks" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
+  <div style="font-size:10px;color:#e74c3c;font-weight:800;margin-bottom:4px;">🔔 再入荷情報！</div>
+  <div style="font-size:10px;color:var(--muted);margin-bottom:5px;">Sponsored</div>
+  <div style="margin-bottom:4px;font-size:10px;color:var(--muted);">楽天市場で在庫確認</div>
+  <div id="footerLinksRakuten" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-bottom:6px;"></div>
+  <div style="margin-bottom:4px;font-size:10px;color:var(--muted);">Amazonで在庫確認</div>
+  <div id="footerLinksAmazon" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;"></div>
 </div>
 
 <script>
@@ -478,16 +486,21 @@ function amazonUrl(kw) {
 
 function renderAds() {
   const adLinks = document.getElementById('adLinks');
-  const footerLinks = document.getElementById('footerAdLinks');
-  if (!adLinks || !footerLinks) return;
+  const rakutenStyle = 'display:inline-block;background:linear-gradient(90deg,#bf0000,#e00);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;text-decoration:none;';
+  const amazonStyle  = 'display:inline-block;background:linear-gradient(90deg,#ff6a00,#ee0979);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;text-decoration:none;';
 
-  adLinks.innerHTML = TCG_KEYWORDS.map(t =>
-    `<a href="${rakutenUrl(t.kw)}" target="_blank" style="display:inline-block;background:linear-gradient(90deg,#bf0000,#e00);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;text-decoration:none;">${t.label} 楽天</a>`
+  const rakutenHtml = TCG_KEYWORDS.map(t =>
+    `<a href="${rakutenUrl(t.kw)}" target="_blank" style="${rakutenStyle}">${t.label}</a>`
+  ).join('');
+  const amazonHtml = TCG_KEYWORDS.map(t =>
+    `<a href="${amazonUrl(t.kw)}" target="_blank" style="${amazonStyle}">${t.label}</a>`
   ).join('');
 
-  footerLinks.innerHTML = TCG_KEYWORDS.map(t =>
-    `<a href="${amazonUrl(t.kw)}" target="_blank" style="display:inline-block;background:linear-gradient(90deg,#ff6a00,#ee0979);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;text-decoration:none;">${t.label} Amazon</a>`
-  ).join('');
+  const el = (id) => document.getElementById(id);
+  if (el('adLinksRakuten'))    el('adLinksRakuten').innerHTML    = rakutenHtml;
+  if (el('adLinksAmazon'))     el('adLinksAmazon').innerHTML     = amazonHtml;
+  if (el('footerLinksRakuten'))el('footerLinksRakuten').innerHTML= rakutenHtml;
+  if (el('footerLinksAmazon')) el('footerLinksAmazon').innerHTML = amazonHtml;
 }
 
 // ═══════════════════════════════════════
